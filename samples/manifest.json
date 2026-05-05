@@ -1,79 +1,162 @@
 [
   {
     "file": "ts_lung_held_out_donor.h5ad",
-    "label": "Lung \u2014 held-out donor",
+    "label": "Lung — held-out donor",
     "subtitle": "TSP14 alveolar / pneumocyte / immune mix (35 cell types)",
     "recommended_reference": "ts_lung",
     "n_cells": 500
   },
   {
     "file": "ts_bladder.h5ad",
-    "label": "Tabula Sapiens \u2014 Bladder",
+    "label": "Tabula Sapiens — Bladder",
     "subtitle": "500 cells from human Bladder, mixed cell types",
     "recommended_reference": "ts_pan_tissue",
     "n_cells": 500
   },
   {
     "file": "ts_bone_marrow.h5ad",
-    "label": "Tabula Sapiens \u2014 Bone_Marrow",
+    "label": "Tabula Sapiens — Bone_Marrow",
     "subtitle": "500 cells from human Bone_Marrow, mixed cell types",
     "recommended_reference": "ts_pan_tissue",
     "n_cells": 500
   },
   {
     "file": "ts_liver.h5ad",
-    "label": "Tabula Sapiens \u2014 Liver",
+    "label": "Tabula Sapiens — Liver",
     "subtitle": "500 cells from human Liver, mixed cell types",
     "recommended_reference": "ts_pan_tissue",
     "n_cells": 500
   },
   {
     "file": "ts_muscle.h5ad",
-    "label": "Tabula Sapiens \u2014 Muscle",
+    "label": "Tabula Sapiens — Muscle",
     "subtitle": "500 cells from human Muscle, mixed cell types",
     "recommended_reference": "ts_pan_tissue",
     "n_cells": 500
   },
   {
     "file": "ts_blood_held_out_donor.h5ad",
-    "label": "Blood \u2014 held-out donor",
-    "subtitle": "27 immune cell types (CD4/CD8 T, NK, B, monocyte, neutrophil, \u2026)",
+    "label": "Blood — held-out donor",
+    "subtitle": "27 immune cell types (CD4/CD8 T, NK, B, monocyte, neutrophil, …)",
     "recommended_reference": "ts_blood",
     "n_cells": 500
   },
   {
     "file": "abca_olfactory_held_out_donor.h5ad",
-    "label": "Mouse olfactory bulb \u2014 held-out donor",
+    "label": "Mouse olfactory bulb — held-out donor",
     "subtitle": "60 neuronal subtypes; early-affected in Parkinson's & Alzheimer's",
     "recommended_reference": "abca_olfactory",
     "n_cells": 500
   },
   {
     "file": "abca_wmb-10xv3-cb.h5ad",
-    "label": "Mouse brain \u2014 WMB-10Xv3-CB",
+    "label": "Mouse brain — WMB-10Xv3-CB",
     "subtitle": "~84 brain cell types from WMB-10Xv3-CB",
     "recommended_reference": "abca_brain",
     "n_cells": 500
   },
   {
     "file": "abca_wmb-10xv3-ctxsp.h5ad",
-    "label": "Mouse brain \u2014 WMB-10Xv3-CTXsp",
+    "label": "Mouse brain — WMB-10Xv3-CTXsp",
     "subtitle": "~84 brain cell types from WMB-10Xv3-CTXsp",
     "recommended_reference": "abca_brain",
     "n_cells": 500
   },
   {
     "file": "abca_wmb-10xv3-olf.h5ad",
-    "label": "Mouse brain \u2014 WMB-10Xv3-OLF",
+    "label": "Mouse brain — WMB-10Xv3-OLF",
     "subtitle": "~84 brain cell types from WMB-10Xv3-OLF",
     "recommended_reference": "abca_brain",
     "n_cells": 500
   },
   {
     "file": "pbmc_4k_8k.h5ad",
-    "label": "10x PBMC 4K/8K \u2014 held-out donor",
+    "label": "10x PBMC 4K/8K — held-out donor",
     "subtitle": "Public 10x Genomics PBMC dataset; coarse immune cell types",
     "recommended_reference": "ts_blood",
     "n_cells": 500
+  },
+  {
+    "file": "external_ts_blood_e763ed0d.h5ad",
+    "label": "Platelet sub_clusters of COVID-19 Immune Altas: Integration ",
+    "subtitle": "A Web Portal and Workbench for Biological Dissection of Single Cell COVID-19 Hos; n=1550; assay=[\"10x 3' v2\", \"10x 3' v3\", 'Seq-Well']",
+    "recommended_reference": "ts_blood",
+    "n_cells": 1550,
+    "external": true,
+    "source": "https://datasets.cellxgene.cziscience.com/8ca2496b-6254-4b3d-8039-a59e30d9949d.h5ad",
+    "gene_alignment_pct": 57.6,
+    "label_match_pct": 100.0,
+    "source_doi": "10.1016/j.isci.2021.103115"
+  },
+  {
+    "file": "external_ts_lung_6e00ccf7.h5ad",
+    "label": "Single cell transcriptomic profiling identifies molecular ph",
+    "subtitle": "Single cell transcriptomic profiling identifies molecular phenotypes of newborn ; n=1350; assay=[\"10x 3' v2\"]",
+    "recommended_reference": "ts_lung",
+    "n_cells": 1350,
+    "external": true,
+    "source": "https://datasets.cellxgene.cziscience.com/5c27e357-4786-46d4-9635-cb7b37cce452.h5ad",
+    "gene_alignment_pct": 62.4,
+    "label_match_pct": 22.7,
+    "source_doi": "10.3390/genes15030298"
+  },
+  {
+    "file": "external_ts_pan_tissue_fbd69faa.h5ad",
+    "label": "thymus scRNA-seq atlas - myeloid p2 subset",
+    "subtitle": "A spatial human thymus cell atlas mapped to a continuous tissue axis; n=843; assay=[\"10x 3' v2\", \"10x 3' v3\", \"10x 5' v1\", \"10x 5' v2\"]",
+    "recommended_reference": "ts_pan_tissue",
+    "n_cells": 843,
+    "external": true,
+    "source": "https://datasets.cellxgene.cziscience.com/6c49bd07-0978-4b24-9358-f9a11746276a.h5ad",
+    "gene_alignment_pct": 86.3,
+    "label_match_pct": 63.0,
+    "source_doi": "10.1038/s41586-024-07944-6"
+  },
+  {
+    "file": "external_ts_pan_tissue_524e045e.h5ad",
+    "label": "Healthy human liver: hepatic stellate cells",
+    "subtitle": "Single-Cell, Single-Nucleus, and Spatial RNA Sequencing of the Human Liver Ident; n=1374; assay=[\"10x 3' v2\", \"10x 3' v3\"]",
+    "recommended_reference": "ts_pan_tissue",
+    "n_cells": 1374,
+    "external": true,
+    "source": "https://datasets.cellxgene.cziscience.com/b538b83c-c066-4a0b-9ca4-e084ad561947.h5ad",
+    "gene_alignment_pct": 85.5,
+    "label_match_pct": 27.9,
+    "source_doi": "10.1002/hep4.1854"
+  },
+  {
+    "file": "external_ts_lung_810ac45f.h5ad",
+    "label": "Endothelium",
+    "subtitle": "A human fetal lung cell atlas uncovers proximal-distal gradients of differentiat; n=1853; assay=[\"10x 5' v1\"]",
+    "recommended_reference": "ts_lung",
+    "n_cells": 1853,
+    "external": true,
+    "source": "https://datasets.cellxgene.cziscience.com/a013b199-f162-4f78-9a45-f616678c3623.h5ad",
+    "gene_alignment_pct": 60.1,
+    "label_match_pct": 69.6,
+    "source_doi": "10.1016/j.cell.2022.11.005"
+  },
+  {
+    "file": "external_abca_brain_4ec57620.h5ad",
+    "label": "Evolution of cellular diversity in primary motor cortex of m",
+    "subtitle": "Evolution of cellular diversity in primary motor cortex of human, marmoset monke; n=1560; assay=[\"10x 3' v3\"]",
+    "recommended_reference": "abca_brain",
+    "n_cells": 1560,
+    "external": true,
+    "source": "https://datasets.cellxgene.cziscience.com/6a88070f-a416-4a83-beb4-709d1f81cc43.h5ad",
+    "gene_alignment_pct": 95.9,
+    "label_match_pct": 0.0,
+    "source_doi": "10.1038/s41586-021-03465-8"
+  },
+  {
+    "file": "external_ts_blood_36a22a49.h5ad",
+    "label": "Human Immune Health Atlas — Other cells",
+    "subtitle": "Human Immune Health Atlas; n=4077; assay=['10x']",
+    "recommended_reference": "ts_blood",
+    "n_cells": 4077,
+    "external": true,
+    "source": "https://datasets.cellxgene.cziscience.com/36a22a49-8532-43d4-afa2-d90c894a6c7a.h5ad",
+    "gene_alignment_pct": 67.8,
+    "label_match_pct": 86.0
   }
 ]
