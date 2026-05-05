@@ -1,0 +1,79 @@
+[
+  {
+    "file": "ts_lung_held_out_donor.h5ad",
+    "label": "Lung \u2014 held-out donor",
+    "subtitle": "TSP14 alveolar / pneumocyte / immune mix (35 cell types)",
+    "recommended_reference": "ts_lung",
+    "n_cells": 500
+  },
+  {
+    "file": "ts_bladder.h5ad",
+    "label": "Tabula Sapiens \u2014 Bladder",
+    "subtitle": "500 cells from human Bladder, mixed cell types",
+    "recommended_reference": "ts_pan_tissue",
+    "n_cells": 500
+  },
+  {
+    "file": "ts_bone_marrow.h5ad",
+    "label": "Tabula Sapiens \u2014 Bone_Marrow",
+    "subtitle": "500 cells from human Bone_Marrow, mixed cell types",
+    "recommended_reference": "ts_pan_tissue",
+    "n_cells": 500
+  },
+  {
+    "file": "ts_liver.h5ad",
+    "label": "Tabula Sapiens \u2014 Liver",
+    "subtitle": "500 cells from human Liver, mixed cell types",
+    "recommended_reference": "ts_pan_tissue",
+    "n_cells": 500
+  },
+  {
+    "file": "ts_muscle.h5ad",
+    "label": "Tabula Sapiens \u2014 Muscle",
+    "subtitle": "500 cells from human Muscle, mixed cell types",
+    "recommended_reference": "ts_pan_tissue",
+    "n_cells": 500
+  },
+  {
+    "file": "ts_blood_held_out_donor.h5ad",
+    "label": "Blood \u2014 held-out donor",
+    "subtitle": "27 immune cell types (CD4/CD8 T, NK, B, monocyte, neutrophil, \u2026)",
+    "recommended_reference": "ts_blood",
+    "n_cells": 500
+  },
+  {
+    "file": "abca_olfactory_held_out_donor.h5ad",
+    "label": "Mouse olfactory bulb \u2014 held-out donor",
+    "subtitle": "60 neuronal subtypes; early-affected in Parkinson's & Alzheimer's",
+    "recommended_reference": "abca_olfactory",
+    "n_cells": 500
+  },
+  {
+    "file": "abca_wmb-10xv3-cb.h5ad",
+    "label": "Mouse brain \u2014 WMB-10Xv3-CB",
+    "subtitle": "~84 brain cell types from WMB-10Xv3-CB",
+    "recommended_reference": "abca_brain",
+    "n_cells": 500
+  },
+  {
+    "file": "abca_wmb-10xv3-ctxsp.h5ad",
+    "label": "Mouse brain \u2014 WMB-10Xv3-CTXsp",
+    "subtitle": "~84 brain cell types from WMB-10Xv3-CTXsp",
+    "recommended_reference": "abca_brain",
+    "n_cells": 500
+  },
+  {
+    "file": "abca_wmb-10xv3-olf.h5ad",
+    "label": "Mouse brain \u2014 WMB-10Xv3-OLF",
+    "subtitle": "~84 brain cell types from WMB-10Xv3-OLF",
+    "recommended_reference": "abca_brain",
+    "n_cells": 500
+  },
+  {
+    "file": "pbmc_4k_8k.h5ad",
+    "label": "10x PBMC 4K/8K \u2014 held-out donor",
+    "subtitle": "Public 10x Genomics PBMC dataset; coarse immune cell types",
+    "recommended_reference": "ts_blood",
+    "n_cells": 500
+  }
+]

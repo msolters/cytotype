@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>cytotype — auditable cell-type annotation (browser)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<style>
+  .privacy-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px;
+    background: var(--good-bg); color: var(--good);
+    border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .privacy-badge::before { content: "●"; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand" id="nav-home" title="back to upload" role="button" tabindex="0">
+    <div class="brand-mark">cy</div>
+    <div class="brand-text">
+      <div class="brand-name">cytotype
+        <span class="privacy-badge">private · 100% in-browser</span>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-meta">
+    <button class="nav-btn nav-new-file" id="nav-new-file" title="upload a different file (Esc)">
+      <span class="nav-btn-icon">←</span>
+      <span class="nav-btn-label">new file</span>
+      <span class="nav-btn-key">Esc</span>
+    </button>
+    <button class="theme-toggle" id="theme-toggle" title="toggle theme">◐</button>
+    <label class="debug-toggle" title="Show ground-truth comparison if the input file has labels (developer mode)">
+      <input type="checkbox" id="debug-toggle"> debug mode
+    </label>
+    <span id="ref-meta">loading reference…</span>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- STAGE 1: upload -->
+  <section id="stage-upload" class="stage stage-upload active">
+    <div class="welcome">
+      <h1 class="welcome-title">Auditable cell-type annotation, in your browser.</h1>
+      <p class="welcome-lede">
+        Drop a single-cell RNA-seq dataset (<code>.h5ad</code>) and get back per-cell predicted
+        cell types with the marker-gene evidence behind every call. Built for computational
+        biologists who need defensible labels — not just "the model said so" but
+        <em>"these four genes co-fired and that 4-tuple is associated with cell type X."</em>
+      </p>
+      <ul class="welcome-bullets">
+        <li><strong>Audit-trail predictions.</strong> Each cell carries the marker tuple that drove its label.</li>
+        <li><strong>Five reference atlases bundled.</strong> Human blood / lung / multi-tissue, mouse olfactory bulb / multi-region brain.</li>
+        <li><strong>Annotation in seconds.</strong> ~10 MB ONNX model runs locally via WebAssembly.</li>
+      </ul>
+    </div>
+
+    <div class="upload-card">
+      <div class="privacy-callout">
+        <span class="privacy-dot"></span>
+        <span><strong>Private by design.</strong> Your file is parsed and analysed entirely in this browser tab. Nothing is uploaded to any server.</span>
+      </div>
+
+      <div id="dropzone" class="dropzone">
+        <input type="file" id="file-input" accept=".h5ad,.h5" hidden>
+        <div class="dropzone-inner">
+          <div class="dropzone-icon">⬢</div>
+          <div class="dropzone-title">Drag &amp; drop a .h5ad file, or click to browse</div>
+          <div class="dropzone-sub">model + catalog cached after first load</div>
+        </div>
+      </div>
+
+      <div class="ref-picker">
+        <label class="muted small">Reference atlas</label>
+        <select id="reference-select">
+          <option value="ts_blood">ts_blood — loading…</option>
+        </select>
+        <div class="ref-desc muted small" id="ref-desc"></div>
+      </div>
+    </div>
+
+    <div class="samples-section">
+      <div class="samples-title">
+        <span>or try a sample dataset</span>
+        <span class="muted small">click any to run the full pipeline locally</span>
+      </div>
+      <div class="samples-grid" id="samples-grid"><span class="muted small">loading samples…</span></div>
+    </div>
+  </section>
+
+  <!-- STAGE 2: processing -->
+  <section id="stage-processing" class="stage stage-processing">
+    <div class="proc-card">
+      <div class="spinner"></div>
+      <h2 id="proc-title">Loading model…</h2>
+      <p class="muted" id="proc-detail"></p>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="proc-steps">
+        <div class="step" data-step="model"><span class="step-dot"></span>Load model</div>
+        <div class="step" data-step="parse"><span class="step-dot"></span>Parse .h5ad</div>
+        <div class="step" data-step="align"><span class="step-dot"></span>Gene alignment</div>
+        <div class="step" data-step="encode"><span class="step-dot"></span>Encode + classify</div>
+        <div class="step" data-step="audit"><span class="step-dot"></span>Marker audit</div>
+        <div class="step" data-step="render"><span class="step-dot"></span>Render</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAGE 3: results -->
+  <section id="stage-results" class="stage stage-results">
+    <div class="results-toolbar">
+      <div class="results-summary">
+        <div><span class="summary-num" id="summary-n">—</span> cells</div>
+        <div><span class="summary-num" id="summary-classes">—</span> classes</div>
+        <div><span class="summary-num" id="summary-low">—</span> low-confidence</div>
+        <div><span class="summary-num" id="summary-align">—</span> gene alignment</div>
+        <div class="debug-only" id="summary-gt-wrap"><span class="summary-num" id="summary-gt">—</span> top-1 accuracy <span class="muted small">vs ground truth</span></div>
+      </div>
+      <div class="results-actions">
+        <a id="download-csv" href="#" class="btn">audit.csv</a>
+        <button id="reset-btn" class="btn btn-ghost">↻ start over</button>
+      </div>
+    </div>
+
+    <div class="results-body">
+      <aside class="class-rail">
+        <div class="rail-title">predicted class</div>
+        <div id="class-list" class="class-list"></div>
+      </aside>
+      <div class="cells-pane">
+        <div class="cells-toolbar">
+          <input type="search" id="cell-filter" placeholder="filter cells (id, class, marker gene)…" class="filter-input">
+          <div class="sort-controls">
+            <label class="muted small">sort</label>
+            <select id="cell-sort">
+              <option value="conf-desc">confidence ↓</option>
+              <option value="conf-asc">confidence ↑</option>
+              <option value="class">class</option>
+              <option value="id">cell id</option>
+            </select>
+          </div>
+        </div>
+        <div class="cells-header">
+          <div class="col-correct">match</div>
+          <div class="col-id">cell id</div>
+          <div class="col-class">predicted class</div>
+          <div class="col-conf">conf</div>
+          <div class="col-truth">ground truth</div>
+        </div>
+        <div class="cells-list" id="cells-list"></div>
+        <div class="cells-status muted small" id="cells-status"></div>
+      </div>
+      <aside class="detail-pane" id="detail-pane">
+        <div class="detail-empty muted small">click a cell to see audit details</div>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<!-- ONNX Runtime Web (WASM backend) -->
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/ort.min.js"></script>
+<!-- h5wasm for parsing .h5ad client-side -->
+<script type="module" src="app.js" defer></script>
+
+<footer class="ct-footer"><span>© 2026 Mark Solters</span><span>·</span><a href="https://github.com/msolters/cytotype" rel="noopener noreferrer">github</a><span>·</span><span>MIT licensed</span></footer>
+</body>
+</html>
