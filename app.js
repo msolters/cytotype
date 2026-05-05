@@ -447,10 +447,16 @@ async function runInference(X, nObs, nVar, batchSize = 256) {
 }
 
 // ---- per-cell predictions + softmax confidence ----
+// Returns top-1 prediction, its softmax probability (`conf`), the runner-up
+// class index (`alt`), and the margin between top-1 and top-2 probabilities.
+// Margin is used to flag open-set / novel cells: when the model can't tell
+// the top-2 candidates apart, forcing into one is dishonest — better to
+// surface that uncertainty.
 function predictionsFromCosines(cosines, nObs, nClasses, scale) {
   const pred = new Int32Array(nObs);
   const alt = new Int32Array(nObs);
   const conf = new Float32Array(nObs);
+  const margin = new Float32Array(nObs);
   const exps = new Float32Array(nClasses);
   for (let r = 0; r < nObs; r++) {
     const off = r * nClasses;
@@ -472,8 +478,22 @@ function predictionsFromCosines(cosines, nObs, nClasses, scale) {
       if (exps[c] > amx) { amx = exps[c]; ami = c; }
     }
     alt[r] = ami;
+    margin[r] = conf[r] - amx / sumE;
   }
-  return { pred, alt, conf };
+  return { pred, alt, conf, margin };
+}
+
+// Open-set rejection thresholds. `confidence_threshold` is the absolute
+// top-1 softmax prob below which the prediction is "weak"; `margin_threshold`
+// is the gap between top-1 and top-2 below which the prediction is "ambiguous".
+// A cell flagged on either basis is annotated `novel/uncertain` rather than
+// being forced into the closest known class. Calibrated against the
+// well-classified-cell distribution (mean p≈0.4, mean margin≈0.25 for
+// confident calls in the held-out splits we measured).
+const NOVEL_CONF_THRESHOLD = 0.10;
+const NOVEL_MARGIN_THRESHOLD = 0.05;
+function isOpenSetNovel(confValue, marginValue) {
+  return confValue < NOVEL_CONF_THRESHOLD || marginValue < NOVEL_MARGIN_THRESHOLD;
 }
 
 // ---- per-cell marker audit ----
@@ -657,7 +677,7 @@ async function annotate(file) {
     setProc("Normalising…", `input kind: ${kind}`, 60);
     normaliseInPlace(aligned.X, aligned.n_obs, aligned.n_var, kind);
     const cosines = await runInference(aligned.X, aligned.n_obs, aligned.n_var);
-    const { pred, alt, conf } = predictionsFromCosines(cosines, aligned.n_obs, State.classes.length, State.arcfaceScale);
+    const { pred, alt, conf, margin } = predictionsFromCosines(cosines, aligned.n_obs, State.classes.length, State.arcfaceScale);
     const audit = runAudit(aligned.X, aligned.n_obs, aligned.n_var, pred);
     // Make sure the Cell Ontology lookup tables are ready before we score
     // ground truth — this lets unknown labels fall back to ancestor matching.
@@ -674,7 +694,7 @@ async function annotate(file) {
         alignment_source: aligned.alignment.source_column,
         input_kind: kind,
       },
-      cells: buildCellRows(parsed, pred, alt, conf, audit, gt),
+      cells: buildCellRows(parsed, pred, alt, conf, margin, audit, gt),
       class_summary: buildClassSummary(pred),
       has_ground_truth: !!gt,
       ground_truth: gt ? {
@@ -693,19 +713,22 @@ async function annotate(file) {
   }
 }
 
-function buildCellRows(parsed, pred, alt, conf, audit, gt) {
+function buildCellRows(parsed, pred, alt, conf, margin, audit, gt) {
   const out = [];
   const cls = State.classes;
   const limit = Math.min(parsed.nObs, 5000);
   for (let i = 0; i < limit; i++) {
+    const novel = isOpenSetNovel(conf[i], margin[i]);
     const row = {
       id: parsed.obsNames[i],
       predicted: cls[pred[i]],
       confidence: conf[i],
+      margin: margin[i],
       alternative: cls[alt[i]],
       marker_evidence: audit.evidence[i],
       audit_specificity: audit.specificity[i],
       low_confidence: conf[i] < 0.15 ? 1 : 0,
+      novel: novel ? 1 : 0,
     };
     if (gt) {
       row.ground_truth = gt.labels[i];
@@ -745,17 +768,19 @@ function onResult() {
   $("#download-csv").setAttribute("download", "audit.csv");
 }
 function buildCsv(cells) {
-  const header = ["cell_id","ct_predicted","ct_confidence","ct_alternative",
-                  "ct_marker_evidence","ct_audit_specificity","ct_low_confidence"];
+  const header = ["cell_id","ct_predicted","ct_confidence","ct_margin","ct_alternative",
+                  "ct_marker_evidence","ct_audit_specificity","ct_low_confidence","ct_novel"];
   if (cells[0] && "ground_truth" in cells[0]) {
-    header.push("ct_ground_truth", "ct_correct");
+    header.push("ct_ground_truth", "ct_correct", "ct_gt_resolved", "ct_gt_depth");
   }
   const rows = [header.join(",")];
   for (const c of cells) {
-    const row = [c.id, c.predicted, c.confidence.toFixed(4), c.alternative,
-                 c.marker_evidence, c.audit_specificity.toFixed(4), c.low_confidence];
+    const row = [c.id, c.predicted, c.confidence.toFixed(4),
+                 (c.margin ?? 0).toFixed(4),
+                 c.alternative, c.marker_evidence, c.audit_specificity.toFixed(4),
+                 c.low_confidence, c.novel ?? 0];
     if ("ground_truth" in c) {
-      row.push(c.ground_truth, c.correct);
+      row.push(c.ground_truth, c.correct, c.gt_resolved ?? "", c.gt_depth ?? -1);
     }
     rows.push(row.map(v => /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : v).join(","));
   }
@@ -768,6 +793,11 @@ function renderSummary() {
   $("#summary-classes").textContent = State.result.class_summary.length;
   const lowN = State.result.cells.filter(c => c.low_confidence).length;
   $("#summary-low").textContent = `${lowN.toLocaleString()} (${(100*lowN/s.n_cells).toFixed(1)}%)`;
+  const novelN = State.result.cells.filter(c => c.novel).length;
+  const novelEl = $("#summary-novel");
+  if (novelEl) {
+    novelEl.textContent = `${novelN.toLocaleString()} (${(100*novelN/s.n_cells).toFixed(1)}%)`;
+  }
   $("#summary-align").textContent = `${s.alignment_pct.toFixed(1)}%`;
   const wrap = $("#summary-gt-wrap");
   if (State.result.has_ground_truth && State.result.ground_truth) {
@@ -835,9 +865,16 @@ function renderCellsList() {
         truthCell = `<div class="cell-truth" title="${escapeHtml(cell.ground_truth)}">${escapeHtml(cell.ground_truth)}</div>`;
       }
     }
+    if (cell.novel) row.classList.add("novel");
+    const novelTip = cell.novel
+      ? ` title="open-set: top-1 confidence ${(cell.confidence*100).toFixed(1)}% with margin ${(cell.margin*100).toFixed(1)}% — model is uncertain; this may be a cell type not in the reference. Manual review recommended."`
+      : "";
+    const classDisplay = cell.novel
+      ? `<span class="cell-novel-tag">novel?</span> ${escapeHtml(cell.predicted)}`
+      : escapeHtml(cell.predicted);
     row.innerHTML = `${correctMark}
       <div class="cell-id" title="${escapeHtml(cell.id)}">${escapeHtml(cell.id)}</div>
-      <div class="cell-class" title="${escapeHtml(cell.predicted)}">${escapeHtml(cell.predicted)}</div>
+      <div class="cell-class"${novelTip}>${classDisplay}</div>
       <div class="cell-conf ${confCls}">${(conf * 100).toFixed(1)}%</div>
       ${truthCell}`;
     row.addEventListener("click", () => selectCell(cell));

@@ -654,6 +654,23 @@ body.debug.has-gt .cells-header .col-truth { display: block; }
 }
 .cell-conf.high { color: var(--good); }
 .cell-conf.low { color: var(--warn); }
+
+/* novel/uncertain cells (open-set rejection) */
+.cell-row.novel .cell-class { color: var(--warn); }
+.cell-novel-tag {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  margin-right: 4px;
+  border-radius: 3px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border: 1px solid var(--warn);
+  vertical-align: middle;
+}
 .cells-status { padding: 8px 14px; border-top: 1px solid var(--border); }
 
 /* detail pane */
