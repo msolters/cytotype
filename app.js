@@ -20,6 +20,9 @@ const State = {
   sort: "conf-desc",
   selectedCellId: null,
   debug: localStorage.getItem("ct.debug") === "1",
+  // Cell Ontology lookup tables, fetched on demand and cached for the session
+  cl: null, // {id_to_name, name_to_id, synonyms, ancestors}
+  clLoading: null, // Promise<void> dedupe
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -531,25 +534,85 @@ function runAudit(X, nObs, nVar, pred) {
 }
 
 // ---- ground truth comparison ----
+// ---- Cell Ontology hierarchical lookup ----
+async function ensureCellOntology() {
+  if (State.cl) return State.cl;
+  if (State.clLoading) return State.clLoading;
+  State.clLoading = (async () => {
+    try {
+      const r = await fetch("cl_ancestors.json");
+      if (!r.ok) throw new Error(`cl_ancestors.json HTTP ${r.status}`);
+      const cl = await r.json();
+      State.cl = cl;
+      console.log(`[ct] CL loaded: ${cl.n_terms} terms, ${Object.keys(cl.synonyms || {}).length} synonyms`);
+      return cl;
+    } catch (e) {
+      console.warn("[ct] CL load failed; hierarchical matching disabled:", e);
+      State.cl = { id_to_name: {}, name_to_id: {}, synonyms: {}, ancestors: {} };
+      return State.cl;
+    }
+  })();
+  return State.clLoading;
+}
+
+/**
+ * Given a label string, find a class index in `vocabSet` that the label
+ * matches via Cell Ontology hierarchy. Returns:
+ *   { idx: number, depth: 0 }  — exact match (case-normalised)
+ *   { idx: number, depth: N }  — matched via N parent edges in CL
+ *   null                        — no match
+ */
+function resolveLabelViaCL(rawLabel, vocabIndex, classes) {
+  const norm = (s) => String(s ?? "").replace(/\0/g, "").trim().toLowerCase();
+  const labelN = norm(rawLabel);
+  if (!labelN) return null;
+  // 1) direct match against vocab
+  if (vocabIndex.has(labelN)) {
+    return { idx: vocabIndex.get(labelN), depth: 0 };
+  }
+  // 2) CL ancestor walk
+  const cl = State.cl;
+  if (!cl || !cl.name_to_id) return null;
+  const cid = cl.name_to_id[labelN] || (cl.synonyms || {})[labelN];
+  if (!cid) return null;
+  const ancestors = cl.ancestors[cid] || [];
+  for (let depth = 0; depth < ancestors.length; depth++) {
+    const ancName = (cl.id_to_name[ancestors[depth]] || "").toLowerCase();
+    if (ancName && vocabIndex.has(ancName)) {
+      return { idx: vocabIndex.get(ancName), depth: depth + 1 };
+    }
+  }
+  return null;
+}
+
 function buildGroundTruth(parsed, pred) {
   if (!parsed.groundTruth) {
     console.log("[ct] no ground truth in parsed h5ad");
     return null;
   }
   const cls = State.classes;
-  // Build a normalized lookup so trailing nulls / whitespace mismatches
-  // don't silently kill the match.
-  const norm = (s) => String(s ?? "").replace(/\0/g, "").trim();
-  const cls_to_idx = new Map(cls.map((c, i) => [norm(c), i]));
+  // Build a normalized lookup keyed by lowercase. CL is a case-insensitive
+  // ontology and our vocab uses CL canonical names — fold case so trailing
+  // nulls / whitespace / capitalisation can't kill matches.
+  const cls_to_idx = new Map(cls.map((c, i) => [String(c).replace(/\0/g, "").trim().toLowerCase(), i]));
   const gtIdx = new Int32Array(parsed.nObs);
-  let nWith = 0;
+  const gtDepth = new Int8Array(parsed.nObs);   // 0 = exact, 1+ = CL depth, -1 = no match
+  let nExact = 0;
+  let nViaCL = 0;
   const unmatched = new Set();
   for (let r = 0; r < parsed.nObs; r++) {
-    const v = norm(parsed.groundTruth[r]);
-    if (cls_to_idx.has(v)) { gtIdx[r] = cls_to_idx.get(v); nWith++; }
-    else { gtIdx[r] = -1; if (unmatched.size < 3) unmatched.add(v); }
+    const resolved = resolveLabelViaCL(parsed.groundTruth[r], cls_to_idx, cls);
+    if (resolved) {
+      gtIdx[r] = resolved.idx;
+      gtDepth[r] = resolved.depth;
+      if (resolved.depth === 0) nExact++; else nViaCL++;
+    } else {
+      gtIdx[r] = -1; gtDepth[r] = -1;
+      if (unmatched.size < 5) unmatched.add(String(parsed.groundTruth[r]));
+    }
   }
-  console.log(`[ct] GT match: ${nWith}/${parsed.nObs} cells (${(100*nWith/parsed.nObs).toFixed(1)}%)`);
+  const nWith = nExact + nViaCL;
+  console.log(`[ct] GT match: ${nWith}/${parsed.nObs} cells (${(100*nWith/parsed.nObs).toFixed(1)}%) — ${nExact} exact, ${nViaCL} via CL ancestor`);
   if (nWith === 0) {
     console.log(`[ct] sample unmatched labels: ${Array.from(unmatched).slice(0, 3).join(' | ')}`);
     console.log(`[ct] sample reference classes: ${cls.slice(0, 3).join(' | ')}`);
@@ -573,11 +636,13 @@ function buildGroundTruth(parsed, pred) {
   return {
     column: parsed.gtColumn,
     n_with_gt: nWith,
+    n_exact: nExact,
+    n_via_cl: nViaCL,
     n_correct: nCorrect,
     top1_accuracy: nCorrect / nWith,
     macro_recall: macro,
     coverage: nWith / parsed.nObs,
-    gtIdx, labels: parsed.groundTruth,
+    gtIdx, gtDepth, labels: parsed.groundTruth,
   };
 }
 
@@ -594,6 +659,9 @@ async function annotate(file) {
     const cosines = await runInference(aligned.X, aligned.n_obs, aligned.n_var);
     const { pred, alt, conf } = predictionsFromCosines(cosines, aligned.n_obs, State.classes.length, State.arcfaceScale);
     const audit = runAudit(aligned.X, aligned.n_obs, aligned.n_var, pred);
+    // Make sure the Cell Ontology lookup tables are ready before we score
+    // ground truth — this lets unknown labels fall back to ancestor matching.
+    await ensureCellOntology();
     const gt = buildGroundTruth(parsed, pred);
     setStep("render", "active");
     setProc("Rendering…", "", 95);
@@ -611,6 +679,7 @@ async function annotate(file) {
       has_ground_truth: !!gt,
       ground_truth: gt ? {
         column: gt.column, n_with_gt: gt.n_with_gt, n_correct: gt.n_correct,
+        n_exact: gt.n_exact, n_via_cl: gt.n_via_cl,
         top1_accuracy: gt.top1_accuracy, macro_recall: gt.macro_recall, coverage: gt.coverage,
       } : null,
     };
@@ -641,6 +710,10 @@ function buildCellRows(parsed, pred, alt, conf, audit, gt) {
     if (gt) {
       row.ground_truth = gt.labels[i];
       row.correct = gt.gtIdx[i] >= 0 ? (pred[i] === gt.gtIdx[i] ? 1 : 0) : -1;
+      // Depth: 0 = exact label match, 1+ = matched via CL ancestor walk, -1 = no match
+      row.gt_depth = gt.gtDepth ? gt.gtDepth[i] : (gt.gtIdx[i] >= 0 ? 0 : -1);
+      // Resolved class is what the cell's true label maps to in our vocab
+      row.gt_resolved = gt.gtIdx[i] >= 0 ? cls[gt.gtIdx[i]] : null;
     }
     out.push(row);
   }
@@ -704,7 +777,12 @@ function renderSummary() {
     const num = $("#summary-gt");
     num.textContent = `${(acc * 100).toFixed(1)}%`;
     num.className = `summary-num ${cls}`;
-    wrap.title = `${gt.n_correct}/${gt.n_with_gt} correct · macro recall ${(gt.macro_recall*100).toFixed(1)}%`;
+    const exactN = gt.n_exact ?? gt.n_with_gt;
+    const clN = gt.n_via_cl ?? 0;
+    const detail = clN > 0
+      ? `${gt.n_correct}/${gt.n_with_gt} correct · ${exactN} exact + ${clN} via Cell Ontology ancestor walk · macro recall ${(gt.macro_recall*100).toFixed(1)}%`
+      : `${gt.n_correct}/${gt.n_with_gt} correct · macro recall ${(gt.macro_recall*100).toFixed(1)}%`;
+    wrap.title = detail;
     wrap.style.display = "";
   } else {
     wrap.style.display = "none";
@@ -738,14 +816,22 @@ function renderCellsList() {
     const confCls = conf < 0.15 ? "low" : (conf > 0.4 ? "high" : "");
     let correctMark = "", truthCell = "";
     if ("correct" in cell) {
+      const depth = (typeof cell.gt_depth === "number") ? cell.gt_depth : (cell.correct >= 0 ? 0 : -1);
+      const depthSuffix = depth > 0 ? `<sup>↑${depth}</sup>` : "";
       if (cell.correct === 1) {
-        correctMark = `<span class="cell-correct yes" title="prediction matches ground truth">✓ OK</span>`;
-        truthCell = `<div class="cell-truth" title="${escapeHtml(cell.ground_truth)}">${escapeHtml(cell.ground_truth)}</div>`;
+        const tip = depth === 0
+          ? "prediction matches ground truth"
+          : `prediction matches ground truth via Cell Ontology (parent walk depth ${depth} — model class is ${depth} step${depth>1?"s":""} above the labelled type)`;
+        correctMark = `<span class="cell-correct yes" title="${tip}">✓ OK${depthSuffix}</span>`;
+        truthCell = `<div class="cell-truth" title="${escapeHtml(cell.ground_truth)}${depth > 0 ? ` (CL depth ${depth} → ${cell.gt_resolved})` : ''}">${escapeHtml(cell.ground_truth)}</div>`;
       } else if (cell.correct === 0) {
-        correctMark = `<span class="cell-correct no" title="predicted does not match ground truth">✗ MISS</span>`;
-        truthCell = `<div class="cell-truth miss" title="${escapeHtml(cell.ground_truth)}">${escapeHtml(cell.ground_truth)}</div>`;
+        const tip = depth === 0
+          ? "predicted does not match ground truth"
+          : `prediction differs from ground truth (truth resolved to ${cell.gt_resolved} via CL depth ${depth})`;
+        correctMark = `<span class="cell-correct no" title="${tip}">✗ MISS${depthSuffix}</span>`;
+        truthCell = `<div class="cell-truth miss" title="${escapeHtml(cell.ground_truth)}${depth > 0 ? ` (CL depth ${depth} → ${cell.gt_resolved})` : ''}">${escapeHtml(cell.ground_truth)}</div>`;
       } else {
-        correctMark = `<span class="cell-correct na" title="ground truth not in reference vocabulary">— N/A</span>`;
+        correctMark = `<span class="cell-correct na" title="ground truth not in reference vocabulary, no CL ancestor in vocab either">— N/A</span>`;
         truthCell = `<div class="cell-truth" title="${escapeHtml(cell.ground_truth)}">${escapeHtml(cell.ground_truth)}</div>`;
       }
     }
@@ -899,6 +985,10 @@ loadReference(State.selectedRef).catch((e) => {
   console.error("model preload failed", e);
   $("#ref-meta").textContent = "(model preload failed: " + e.message + ")";
 });
+
+// pre-warm Cell Ontology in the background; it's needed for hierarchical
+// label resolution in debug mode but not for inference itself.
+ensureCellOntology();
 
 async function populateReferenceDropdown() {
   try {
