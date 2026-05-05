@@ -4,77 +4,110 @@
     "label": "Lung — held-out donor",
     "subtitle": "TSP14 alveolar / pneumocyte / immune mix (35 cell types)",
     "recommended_reference": "ts_lung",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "CC BY 4.0",
+    "citation": "Tabula Sapiens Consortium, Science 2022 (DOI 10.1126/science.abl4896). Lung subset, donor TSP14 held out.",
+    "source_url": "https://tabula-sapiens-portal.ds.czbiohub.org/"
   },
   {
     "file": "ts_bladder.h5ad",
     "label": "Tabula Sapiens — Bladder",
     "subtitle": "500 cells from human Bladder, mixed cell types",
     "recommended_reference": "ts_pan_tissue",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "CC BY 4.0",
+    "citation": "Tabula Sapiens Consortium, Science 2022 (DOI 10.1126/science.abl4896). Bladder subset, held-out donor.",
+    "source_url": "https://tabula-sapiens-portal.ds.czbiohub.org/"
   },
   {
     "file": "ts_bone_marrow.h5ad",
     "label": "Tabula Sapiens — Bone_Marrow",
     "subtitle": "500 cells from human Bone_Marrow, mixed cell types",
     "recommended_reference": "ts_pan_tissue",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "CC BY 4.0",
+    "citation": "Tabula Sapiens Consortium, Science 2022 (DOI 10.1126/science.abl4896). Bone marrow subset, held-out donor.",
+    "source_url": "https://tabula-sapiens-portal.ds.czbiohub.org/"
   },
   {
     "file": "ts_liver.h5ad",
     "label": "Tabula Sapiens — Liver",
     "subtitle": "500 cells from human Liver, mixed cell types",
     "recommended_reference": "ts_pan_tissue",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "CC BY 4.0",
+    "citation": "Tabula Sapiens Consortium, Science 2022 (DOI 10.1126/science.abl4896). Liver subset, held-out donor.",
+    "source_url": "https://tabula-sapiens-portal.ds.czbiohub.org/"
   },
   {
     "file": "ts_muscle.h5ad",
     "label": "Tabula Sapiens — Muscle",
     "subtitle": "500 cells from human Muscle, mixed cell types",
     "recommended_reference": "ts_pan_tissue",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "CC BY 4.0",
+    "citation": "Tabula Sapiens Consortium, Science 2022 (DOI 10.1126/science.abl4896). Muscle subset, held-out donor.",
+    "source_url": "https://tabula-sapiens-portal.ds.czbiohub.org/"
   },
   {
     "file": "ts_blood_held_out_donor.h5ad",
     "label": "Blood — held-out donor",
     "subtitle": "27 immune cell types (CD4/CD8 T, NK, B, monocyte, neutrophil, …)",
     "recommended_reference": "ts_blood",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "CC BY 4.0",
+    "citation": "Tabula Sapiens Consortium, Science 2022 (DOI 10.1126/science.abl4896). Blood subset, held-out donor.",
+    "source_url": "https://tabula-sapiens-portal.ds.czbiohub.org/"
   },
   {
     "file": "abca_olfactory_held_out_donor.h5ad",
     "label": "Mouse olfactory bulb — held-out donor",
     "subtitle": "60 neuronal subtypes; early-affected in Parkinson's & Alzheimer's",
     "recommended_reference": "abca_olfactory",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "CC BY 4.0",
+    "citation": "Yao et al, A high-resolution transcriptomic and spatial atlas of cell types in the whole mouse brain, Nature 2023 (DOI 10.1038/s41586-023-06812-z). Allen Brain Cell Atlas — olfactory bulb subset.",
+    "source_url": "https://portal.brain-map.org/atlases-and-data/bkp/abc-atlas"
   },
   {
     "file": "abca_wmb-10xv3-cb.h5ad",
     "label": "Mouse brain — WMB-10Xv3-CB",
     "subtitle": "~84 brain cell types from WMB-10Xv3-CB",
     "recommended_reference": "abca_brain",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "CC BY 4.0",
+    "citation": "Yao et al, Nature 2023 (DOI 10.1038/s41586-023-06812-z). ABCA WMB-10Xv3 cerebellum, held-out donor.",
+    "source_url": "https://portal.brain-map.org/atlases-and-data/bkp/abc-atlas"
   },
   {
     "file": "abca_wmb-10xv3-ctxsp.h5ad",
     "label": "Mouse brain — WMB-10Xv3-CTXsp",
     "subtitle": "~84 brain cell types from WMB-10Xv3-CTXsp",
     "recommended_reference": "abca_brain",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "CC BY 4.0",
+    "citation": "Yao et al, Nature 2023 (DOI 10.1038/s41586-023-06812-z). ABCA WMB-10Xv3 cortical subplate, held-out donor.",
+    "source_url": "https://portal.brain-map.org/atlases-and-data/bkp/abc-atlas"
   },
   {
     "file": "abca_wmb-10xv3-olf.h5ad",
     "label": "Mouse brain — WMB-10Xv3-OLF",
     "subtitle": "~84 brain cell types from WMB-10Xv3-OLF",
     "recommended_reference": "abca_brain",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "CC BY 4.0",
+    "citation": "Yao et al, Nature 2023 (DOI 10.1038/s41586-023-06812-z). ABCA WMB-10Xv3 olfactory areas, held-out donor.",
+    "source_url": "https://portal.brain-map.org/atlases-and-data/bkp/abc-atlas"
   },
   {
     "file": "pbmc_4k_8k.h5ad",
     "label": "10x PBMC 4K/8K — held-out donor",
     "subtitle": "Public 10x Genomics PBMC dataset; coarse immune cell types",
     "recommended_reference": "ts_blood",
-    "n_cells": 500
+    "n_cells": 500,
+    "license": "10x Genomics Public Data Use",
+    "citation": "10x Genomics PBMC 4K & 8K public datasets (Zheng et al, Nat Commun 2017, DOI 10.1038/ncomms14049), processed by Lopez et al, scVI, Nat Methods 2018 (DOI 10.1038/s41592-018-0229-2).",
+    "source_url": "https://www.10xgenomics.com/datasets"
   },
   {
     "file": "external_ts_blood_e763ed0d.h5ad",
@@ -86,7 +119,9 @@
     "source": "https://datasets.cellxgene.cziscience.com/8ca2496b-6254-4b3d-8039-a59e30d9949d.h5ad",
     "gene_alignment_pct": 57.6,
     "label_match_pct": 100.0,
-    "source_doi": "10.1016/j.isci.2021.103115"
+    "source_doi": "10.1016/j.isci.2021.103115",
+    "license": "CC BY 4.0",
+    "citation": "Su et al, A web portal and workbench for biological dissection of single cell COVID-19 host responses, iScience 2021 (DOI 10.1016/j.isci.2021.103115). Sourced via CELLxGENE Discover."
   },
   {
     "file": "external_ts_lung_6e00ccf7.h5ad",
@@ -98,7 +133,9 @@
     "source": "https://datasets.cellxgene.cziscience.com/5c27e357-4786-46d4-9635-cb7b37cce452.h5ad",
     "gene_alignment_pct": 62.4,
     "label_match_pct": 22.7,
-    "source_doi": "10.3390/genes15030298"
+    "source_doi": "10.3390/genes15030298",
+    "license": "CC BY 4.0",
+    "citation": "Sun et al, Genes 2024 (DOI 10.3390/genes15030298). Newborn lung scRNA-seq molecular phenotypes. Sourced via CELLxGENE Discover."
   },
   {
     "file": "external_ts_pan_tissue_fbd69faa.h5ad",
@@ -110,7 +147,9 @@
     "source": "https://datasets.cellxgene.cziscience.com/6c49bd07-0978-4b24-9358-f9a11746276a.h5ad",
     "gene_alignment_pct": 86.3,
     "label_match_pct": 63.0,
-    "source_doi": "10.1038/s41586-024-07944-6"
+    "source_doi": "10.1038/s41586-024-07944-6",
+    "license": "CC BY 4.0",
+    "citation": "Yayon et al, A spatial human thymus cell atlas mapped to a continuous tissue axis, Nature 2024 (DOI 10.1038/s41586-024-07944-6). Myeloid subset. Sourced via CELLxGENE Discover."
   },
   {
     "file": "external_ts_pan_tissue_524e045e.h5ad",
@@ -122,7 +161,9 @@
     "source": "https://datasets.cellxgene.cziscience.com/b538b83c-c066-4a0b-9ca4-e084ad561947.h5ad",
     "gene_alignment_pct": 85.5,
     "label_match_pct": 27.9,
-    "source_doi": "10.1002/hep4.1854"
+    "source_doi": "10.1002/hep4.1854",
+    "license": "CC BY 4.0",
+    "citation": "Andrews et al, Single-cell, single-nucleus, and spatial RNA sequencing of the human liver, Hepatol Commun 2022 (DOI 10.1002/hep4.1854). Hepatic stellate cells. Sourced via CELLxGENE Discover."
   },
   {
     "file": "external_ts_lung_810ac45f.h5ad",
@@ -134,7 +175,9 @@
     "source": "https://datasets.cellxgene.cziscience.com/a013b199-f162-4f78-9a45-f616678c3623.h5ad",
     "gene_alignment_pct": 60.1,
     "label_match_pct": 69.6,
-    "source_doi": "10.1016/j.cell.2022.11.005"
+    "source_doi": "10.1016/j.cell.2022.11.005",
+    "license": "CC BY 4.0",
+    "citation": "He et al, A human fetal lung cell atlas uncovers proximal-distal gradients of differentiation, Cell 2022 (DOI 10.1016/j.cell.2022.11.005). Endothelium subset. Sourced via CELLxGENE Discover."
   },
   {
     "file": "external_abca_brain_4ec57620.h5ad",
@@ -146,7 +189,9 @@
     "source": "https://datasets.cellxgene.cziscience.com/6a88070f-a416-4a83-beb4-709d1f81cc43.h5ad",
     "gene_alignment_pct": 95.9,
     "label_match_pct": 0.0,
-    "source_doi": "10.1038/s41586-021-03465-8"
+    "source_doi": "10.1038/s41586-021-03465-8",
+    "license": "CC BY 4.0",
+    "citation": "Bakken et al, Comparative cellular analysis of motor cortex in human, marmoset and mouse, Nature 2021 (DOI 10.1038/s41586-021-03465-8). Sourced via CELLxGENE Discover."
   },
   {
     "file": "external_ts_blood_36a22a49.h5ad",
@@ -157,6 +202,8 @@
     "external": true,
     "source": "https://datasets.cellxgene.cziscience.com/36a22a49-8532-43d4-afa2-d90c894a6c7a.h5ad",
     "gene_alignment_pct": 67.8,
-    "label_match_pct": 86.0
+    "label_match_pct": 86.0,
+    "license": "CC BY 4.0",
+    "citation": "Allen Institute for Immunology, Human Immune Health Atlas. Sourced via CELLxGENE Discover."
   }
 ]
